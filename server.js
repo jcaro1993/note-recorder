@@ -43,21 +43,3 @@ app.post("/api/notes", (req, res) => {
         res.json(db)
     })
 })
-
-app.delete("./api/notes/:id", (req, res) => {
-    const id = req.params.id;
-    const dbIndex = db.findIndex(p => p.id == id);
-    db.splice(dbIndex, 1);
-    fs.writeFile("./Develop/db/db.json", JSON.stringify(db), err => {
-        if (err) throw err
-        res.json(db)
-    })
-})
-app.get("number", (req, res) => {
-    res.sendFile(path.join(__dirname, "/public/index.html"));
-});
-
-
-app.listen(PORT, () => {
-    console.log("You started up the server")
-})
