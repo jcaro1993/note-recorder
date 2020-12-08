@@ -8,7 +8,6 @@ const path = require("path");
 // Declaring global variables
 const PORT = process.env.PORT || 10000;
 const db = require("./db/db.json")
-let num = 0
     // Middlewear
     // we need the urlencoded middle which gives us access to req.body
 app.use(express.urlencoded({ extended: true }));
@@ -27,19 +26,44 @@ app.use(express.static('public'))
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "/public/index.html"))
 });
+
+app.get("/notes", (req, res) => {
+    // res.send("I've deleted your homework")
+    res.sendFile(path.join(__dirname, "/public/notes.html"))
+});
 // API ROUTES HERE
 // Our end goal is to return the data in db.json in our response
 // What are our tools, we have express get, express post, and express delete
 // 2 ways of handling this problem. #1 we can make variable to store the db.json file
-// #2 we need to use fsreadfile if we want the grab the data and send it to the front-end
-// We write a test route to see how data will be pushed in when we do our post. *Remember POST routes accepts data from the front-end and then can be populated in an obj to be pushed into an array
-app.post("/api/notes", (req, res) => {
-    num++;
-    const newNote = req.body;
-    newNote.id = num;
-    db.push(newNote);
-    fs.writeFile("./Develop/db/db.json", JSON.stringify(db), err => {
-        if (err) throw err
+app.get("/api/notes", (req, res) => {
         res.json(db)
     })
+    // #2 we need to use fsreadfile if we want the grab the data and send it to the front-end
+    // We write a test route to see how data will be pushed in when we do our post. *Remember POST routes accepts data from the front-end and then can be populated in an obj to be pushed into an array
+app.post("/api/notes", (req, res) => {
+    const newNote = req.body;
+    newNote.id = db.length;
+    db.push(newNote);
+    fs.writeFile("./db/db.json", JSON.stringify(db), err => {
+        if (err) throw err
+        res.json(true)
+    })
+})
+
+app.delete("/api/notes/:id", (req, res) => {
+    const id = req.params.id;
+    const dbIndex = db.findIndex(p => p.id == id);
+    db.splice(dbIndex, 1);
+    for (let i = 0; i < db.length; i++) {
+        db[i].id = i
+    }
+    fs.writeFile("./db/db.json", JSON.stringify(db), err => {
+        if (err) throw err
+        res.json(true)
+    })
+});
+
+
+app.listen(PORT, () => {
+    console.log("You started up the server")
 })
